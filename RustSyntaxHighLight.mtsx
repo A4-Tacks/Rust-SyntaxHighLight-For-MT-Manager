@@ -1,0 +1,203 @@
+{
+	// @author: A4-Tacks
+	// @email: wdsjxhno1001@163.com
+	// @last-edit-date: 2023-02-04
+	name: ["Rust", ".rs"],
+	hide: false,
+
+	colors: [
+		// name, light, dark
+		"metaR-bg", #FFC7BD, #552A2B,
+		"metaB-bg", #BDC6FF, #2F3660,
+	],
+
+	// default format note
+	comment: {
+		startsWith: "//",
+		insertSpace: true,
+		addToContains: false, // 不高亮
+	},
+	// long note
+	comment: {
+		startsWith: "/*",
+		endsWith: "*/",
+		insertSpace: false,
+		addToContains: false, // 不高亮
+	},
+
+	lineBackground: {
+		// #[meta]
+		match: /#\[.*\]\s*(?=\n|$)/,
+		color: "metaB-bg",
+	},
+
+	lineBackground: {
+		// #![meta]
+		match: /#!\[.*\]\s*(?=\n|$)/,
+		color: "metaR-bg",
+	},
+
+	contains: [
+		{ // doc note
+			match: /\/\/[!\/].*(\n|$)/,
+			0: "namespace",
+		},
+		{ // note
+			match: /\/\/.*(\n|$)/,
+			0: "comment",
+		},
+		{ // zero length long note
+			match: /\/\*\*\//,
+			0: "comment",
+		},
+		{ // long doc note
+			start: {match: /\/\*[*!]/},
+			end: {match: /\*\//},
+			color: "namespace",
+		},
+		{ // long note
+			start: {match: /\/\*/},
+			end: {match: /\*\//},
+			color: "comment",
+		},
+
+		{ // double quoted string
+			start: {match: /[rb]?"/},
+			end: {match: /"/},
+			color: "string",
+			contains: [
+				{
+					match: /((\\(u[0-7][a-fA-F\d]{3}/
+					 + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
+					2: "strEscape",
+					4: "error",
+				},
+			],
+		},
+		{ // repr string tag......
+			start: {match: /r#"/},
+			end: {match: /"#/},
+			color: "string",
+			contains: [
+				{
+					match: /((\\(u[0-7][a-fA-F\d]{3}/
+					 + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
+					2: "strEscape",
+					4: "error",
+				},
+			],
+		},
+		{ // repr string tag......
+			start: {match: /r##"/},
+			end: {match: /"##/},
+			color: "string",
+			contains: [
+				{
+					match: /((\\(u[0-7][a-fA-F\d]{3}/
+					 + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
+					2: "strEscape",
+					4: "error",
+				},
+			],
+		},
+		{ // repr string tag......
+			start: {match: /r###"/},
+			end: {match: /"###/},
+			color: "string",
+			contains: [
+				{
+					match: /((\\(u[0-7][a-fA-F\d]{3}/
+					 + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
+					2: "strEscape",
+					4: "error",
+				},
+			],
+		},
+		{ // repr string tag......
+			start: {match: /r####"/},
+			end: {match: /"####/},
+			color: "string",
+			contains: [
+				{
+					match: /((\\(u[0-7][a-fA-F\d]{3}/
+					 + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
+					2: "strEscape",
+					4: "error",
+				},
+			],
+		},
+
+		{ // number
+			builtin: #PROGRAM_NUMBER#,
+		},
+
+		{ // number plus
+			match: /\b(\d[_\d]*(\.[_\d]*)?/
+			 + /|0(x[_a-fA-F\d]+|o[_0-7]+|b[_01]+))\b/,
+			0: "number",
+		},
+
+		{ // char
+			match: /'(\\(u[0-7][a-fA-F\d]{3}|x[a-fA-F\d]{2}|[nrt\\0"'])|([^\\]))'/,
+			0: "strEscape",
+		},
+
+		{ // keyword
+			match: /\b/ + keywordsToRegex(
+			"as break const continue crate dyn "
+			"else enum extern false fn for"
+			"if impl in let loop match"
+			"mod move mut pub ref return"
+			"Self self static struct super trait"
+			"true type unsafe use where while"
+			"abstract async await become box do"
+			"final macro override priv try typeof"
+			"unsized virtual yield") + /\b/,
+			0: "keyword",
+		},
+		{ // function
+			match: /\b[a-zA-Z_][a-zA-Z_0-9]*\s*(?=(::\s*)?(<.*>\s*)?\()/,
+			0: "tagName",
+		},
+		{ // macro
+			match: /\b[a-zA-Z_][a-zA-Z_0-9]*!/,
+			0: "label",
+		},
+		{ // lifetime and while tag
+			match: /'[a-zA-Z_][a-zA-Z_0-9]*\b(?!')/,
+			0: "meta"
+		},
+
+		{ // type
+			match: /\b/ + keywordsToRegex(
+			"array bool char"
+			"f32 f64" "fn" "i8 i16 i32 i64 i128 isize"
+			"pointer reference slice str tuple"
+			"u8 u16 u32 u64 u128 unit usize") + /\b/,
+			0: "type",
+		},
+		{ // some traits
+			match: /\b/ + keywordsToRegex(
+				"AsMut AsRef Binary Clone Copy"
+				"Debug Decodable Default Deserialize Display Drop"
+				"Encodable Eq Extend From FromIterator FromStr"
+				"Hash Into IntoIter IntoIterator Iterator LowerExp"
+				"LowerHex Octal Ord PartialEq PartialOrd Serialize"
+				"Signed ToString TryFrom TryInto Unsigned UpperExp"
+				"UpperHex"
+			) + /\b/,
+			0: "variable",
+		},
+
+		{ // (xxx::)xxx
+			match: /\b([a-zA-Z_][a-zA-Z_0-9]*)\b\s*(::)/,
+			1: "keyword2",
+			2: "tagName",
+		},
+		
+		{ // 一些前导符号
+			match: /([*&])(?=[a-zA-Z_])/,
+			1: "variable",
+		},
+	],
+}
