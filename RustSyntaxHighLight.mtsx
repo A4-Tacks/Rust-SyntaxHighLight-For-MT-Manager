@@ -28,13 +28,13 @@
 
 	lineBackground: {
 		// #[meta]
-		match: /^\s*#\[/,
+		match: /^\s*#\[.*$/,
 		color: "metaB-bg",
 	},
 
 	lineBackground: {
 		// #![meta]
-		match: /^\s*#!\[/,
+		match: /^\s*#!\[.*$/,
 		color: "metaR-bg",
 	},
 
