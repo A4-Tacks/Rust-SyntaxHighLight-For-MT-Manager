@@ -135,7 +135,7 @@
                 + /)\b/,
             0: "number",
         },
-        
+
         { // char
             match: /'(\\(u[0-7][a-fA-F\d]{3}|x[a-fA-F\d]{2}|[nrt\\0"'])|([^\\]))'/,
             0: "strEscape",
@@ -195,7 +195,7 @@
             1: "keyword2",
             2: "tagName",
         },
-        
+
         { // 一些前导符号
             match: /([*&])(?=[a-zA-Z_])/,
             1: "variable",
