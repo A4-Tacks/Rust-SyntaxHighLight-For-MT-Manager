@@ -151,7 +151,7 @@
             "true type unsafe use where while"
             "abstract async await become box do"
             "final macro override priv try typeof"
-            "unsized virtual yield"),
+            "unsized virtual yield union"),
             0: "keyword",
         },
         { // function
