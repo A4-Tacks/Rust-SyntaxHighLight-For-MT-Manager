@@ -178,15 +178,15 @@
             "u8 u16 u32 u64 u128 usize"),
             0: "type",
         },
-        { // some traits
+        { // 被预导入的结构体与特征 (取材至 Rust2021)
             match: keywordsToRegex(
-                "AsMut AsRef Binary Clone Copy"
-                "Debug Decodable Default Deserialize Display Drop"
-                "Encodable Eq Extend From FromIterator FromStr"
-                "Hash Into IntoIter IntoIterator Iterator LowerExp"
-                "LowerHex Octal Ord PartialEq PartialOrd Serialize"
-                "Signed ToString TryFrom TryInto Unsigned UpperExp"
-                "UpperHex"
+                "Send Sized Sync Unpin Drop Fn FnMut FnOnce AsMut AsRef"
+                "From Into DoubleEndedIterator ExactSizeIterator Extend"
+                "IntoIterator Iterator Option None Some Result Err Ok"
+                "Deprecatedlog_syntax Clone Clone Copy Copy Debug Default"
+                "Default Eq Eq Hash Ord Ord PartialEq PartialEq PartialOrd"
+                "PartialOrd ToOwned Box String ToString Vec FromIterator"
+                "TryFrom TryInto"
             ),
             0: "variable",
         },
