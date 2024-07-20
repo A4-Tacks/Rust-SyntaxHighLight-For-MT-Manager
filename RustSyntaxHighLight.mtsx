@@ -7,18 +7,19 @@
     hide: false,
 
     colors: [
-        // name, light, dark
-        "metaR-bg", #FFC7BD, #552A2B,
-        "metaB-bg", #BDC6FF, #2F3660,
+        "preproc"           > "label",
+        "funcname"          > "tagName",
+        "typename"          > "type",
+        "path-delim"        > "operator",
     ],
 
-    // default format note
+    // default format comment
     comment: {
         startsWith: "//",
         insertSpace: true,
         addToContains: false, // 不高亮
     },
-    // long note
+    // long comment
     comment: {
         startsWith: "/*",
         endsWith: "*/",
@@ -26,148 +27,175 @@
         addToContains: false, // 不高亮
     },
 
-    lineBackground: {
-        // #[meta]
-        match: /^\s*#\[.*$/,
-        color: "metaB-bg",
-    },
+    defines: [
+        "ident-continue": /[^\x00-\x20!"#$%&'()*+,\-.\/:;<=>?@\[\]^`{|}~]/
+        "norm-ident": /(?:\b_/+include("ident-continue")+/+\b|\b(?!\d)/+include("ident-continue")+/+\b)/
+        "ident": /(?:r#)?/ + include("norm-ident")
+        "rust-derive-trait": {match: keywordsToRegex(
+            "Clone Hash RustcEncodable RustcDecodable Encodable Decodable"
+            "PartialEq Eq PartialOrd Ord Rand Show Debug Default"
+            "FromPrimitive Send Sync Copy"
+        ), 0: "variable"}
+        "attribute-proc-macro-item": [
+            {include: "comments"}
+            {include: "strings"}
+            {
+                start: {match: /derive\(/}
+                end: {match: /\)/}
+                contains: [
+                    {include: "attribute-proc-macro-item"}
+                    {include: "rust-derive-trait"}
+                ]
+            }
+            {
+                start: {match: /\(/}
+                end: {match: /\)|(?=[\]}])/}
+                contains: [{include: "attribute-proc-macro-item"}]
+            }
+            {
+                start: {match: /\[/}
+                end: {match: /\]|(?=[)}])/}
+                contains: [{include: "attribute-proc-macro-item"}]
+            }
+            {
+                start: {match: /\{/}
+                end: {match: /\}|(?=[)\]])/}
+                contains: [{include: "attribute-proc-macro-item"}]
+            }
+            {include: "decl-macro-meta"}
+        ]
+        "comments": [
+            { // doc comment
+                match: /\/\/[!\/].*(?:\n|$)/,
+                0: "namespace",
+            },
+            { // comment
+                match: /\/\/.*(?:\n|$)/,
+                0: "comment",
+            },
+            { // zero length long comment
+                match: /\/\*\*\//,
+                0: "comment",
+            },
+            { // long doc comment
+                start: {match: /\/\*[*!]/},
+                end: {match: /\*\//},
+                color: "namespace",
+            },
+            { // long comment
+                start: {match: /\/\*/},
+                end: {match: /\*\//},
+                color: "comment",
+            },
+        ]
+        "strings": [
+            { // double quoted string
+                start: {match: /[bc]?"/},
+                end: {match: /"/},
+                color: "string",
+                contains: [
+                    {
+                        match: /(?:(\\(?:u\{(?:[_a-fA-F\d]_*){1,6}\}/
+                            + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.))/,
+                        1: "strEscape",
+                        2: "error",
+                    },
+                ],
+            },
+            { // raw string
+                start: {match: /r"/},
+                end: {match: /"/},
+                color: "string",
+            },
+            { // raw string tag......
+                start: {match: /r#"/},
+                end: {match: /"#/},
+                color: "string",
+            },
+            { // raw string tag......
+                start: {match: /r##"/},
+                end: {match: /"##/},
+                color: "string",
+            },
+            { // raw string tag......
+                start: {match: /r###"/},
+                end: {match: /"###/},
+                color: "string",
+            },
+            { // raw string tag......
+                start: {match: /r####"/},
+                end: {match: /"####/},
+                color: "string",
+            },
 
-    lineBackground: {
-        // #![meta]
-        match: /^\s*#!\[.*$/,
-        color: "metaR-bg",
-    },
+            { // char
+                match: /b?'(?:(\\(?:u\{(?:[_a-fA-F\d]_*){1,6}\}|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|[^\\])'/,
+                0: "string",
+                1: "strEscape",
+                2: "error",
+            },
+        ]
+        "decl-macro-meta": [
+            { // macro meta var
+                match: /\$/ + include("ident"),
+                0: "preproc",
+            },
+            { // macro meta braces
+                match: /\$(?=[({])/,
+                0: "preproc",
+            },
+        ]
+    ]
 
     contains: [
-        { // doc note
-            match: /\/\/[!\/].*(\n|$)/,
-            0: "namespace",
-        },
-        { // note
-            match: /\/\/.*(\n|$)/,
-            0: "comment",
-        },
-        { // zero length long note
-            match: /\/\*\*\//,
-            0: "comment",
-        },
-        { // long doc note
-            start: {match: /\/\*[*!]/},
-            end: {match: /\*\//},
-            color: "namespace",
-        },
-        { // long note
-            start: {match: /\/\*/},
-            end: {match: /\*\//},
-            color: "comment",
-        },
-
-        { // double quoted string
-            start: {match: /[rb]?"/},
-            end: {match: /"/},
-            color: "string",
-            contains: [
-                {
-                    match: /((\\(u[0-7][a-fA-F\d]{3}/
-                     + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
-                    2: "strEscape",
-                    4: "error",
-                },
-            ],
-        },
-        { // repr string tag......
-            start: {match: /r#"/},
-            end: {match: /"#/},
-            color: "string",
-            contains: [
-                {
-                    match: /((\\(u[0-7][a-fA-F\d]{3}/
-                     + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
-                    2: "strEscape",
-                    4: "error",
-                },
-            ],
-        },
-        { // repr string tag......
-            start: {match: /r##"/},
-            end: {match: /"##/},
-            color: "string",
-            contains: [
-                {
-                    match: /((\\(u[0-7][a-fA-F\d]{3}/
-                     + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
-                    2: "strEscape",
-                    4: "error",
-                },
-            ],
-        },
-        { // repr string tag......
-            start: {match: /r###"/},
-            end: {match: /"###/},
-            color: "string",
-            contains: [
-                {
-                    match: /((\\(u[0-7][a-fA-F\d]{3}/
-                     + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
-                    2: "strEscape",
-                    4: "error",
-                },
-            ],
-        },
-        { // repr string tag......
-            start: {match: /r####"/},
-            end: {match: /"####/},
-            color: "string",
-            contains: [
-                {
-                    match: /((\\(u[0-7][a-fA-F\d]{3}/
-                     + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.)|([^\\]))/,
-                    2: "strEscape",
-                    4: "error",
-                },
-            ],
-        },
+        { // rust shebang
+            match: /^#![^\[\r\n][^\r\n]*/,
+            0: "comment"
+        }
+        {include: "comments"}
+        {include: "strings"}
 
         { // number
-            match: /\b(0(x[_a-fA-F\d]+|o[_0-7]+|b[_01]+)/
-                + /([iu](8|16|32|64|128|size))?/
-                + /|\d[_\d]*(\.\d[_\d]*)?/
-                + /(f(32|64)|[iu](8|16|32|64|128|size))?/
+            match: /\b(?:0(?:x[_a-fA-F\d]+|o[_0-7]+|b[_01]+)/
+                + /(?:[iu](?:8|16|32|64|128|size))?/
+                + /|\d[_\d]*(?:\.\d[_\d]*)?/
+                + /(?:f(?:32|64)|[iu](?:8|16|32|64|128|size))?/
                 + /)\b/,
             0: "number",
         },
 
-        { // char
-            match: /'(\\(u[0-7][a-fA-F\d]{3}|x[a-fA-F\d]{2}|[nrt\\0"'])|([^\\]))'/,
-            0: "strEscape",
-        },
+        { // raw ident
+            match: /r#/ + include("norm-ident")
+        }
 
-        { // keyword
+        { // function define
+            match: /(fn)\s+(/+include("ident")+/)/,
+            1: "keyword",
+            2: "funcname",
+        },
+        { // weak keywords
+            match: /(union)\s+(/+include("ident")+/)/,
+            1: "keyword",
+            2: "typename",
+        },
+        { // reserved keywords
             match: keywordsToRegex(
-            "as break const continue crate dyn "
-            "else enum extern false fn for"
-            "if impl in let loop match"
-            "mod move mut pub ref return"
-            "Self self static struct super trait"
-            "true type unsafe use where while"
-            "abstract async await become box do"
-            "final macro override priv try typeof"
-            "unsized virtual yield union"),
+                "abstract become box do final override"
+                "priv typeof unsized virtual"
+            ),
+            0: "error",
+        },
+        { // strict keywords
+            match: keywordsToRegex(
+                "as break const continue crate dyn"
+                "else enum extern false fn for"
+                "if impl in let loop match"
+                "mod move mut pub ref return"
+                "static struct super trait"
+                "true type unsafe use where while"
+                "async await macro try yield"),
             0: "keyword",
         },
-        { // function
-            match: /\b[a-zA-Z_][a-zA-Z_0-9]*\s*(?=(::\s*)?(<.*>\s*)?\()/,
-            0: "tagName",
-        },
-        { // macro
-            match: /\b[a-zA-Z_][a-zA-Z_0-9]*!/,
-            0: "label",
-        },
-        { // lifetime and while tag
-            match: /'[a-zA-Z_][a-zA-Z_0-9]*\b(?!')/,
-            0: "meta"
-        },
-
         { // type
             match: keywordsToRegex(
             "bool char"
@@ -178,28 +206,71 @@
             "u8 u16 u32 u64 u128 usize"),
             0: "type",
         },
-        { // 被预导入的结构体与特征 (取材至 Rust2021)
+        { // 被预导入的结构体与特征等 (取材自 Rust 2021 edition)
             match: keywordsToRegex(
                 "Send Sized Sync Unpin Drop Fn FnMut FnOnce AsMut AsRef"
                 "From Into DoubleEndedIterator ExactSizeIterator Extend"
-                "IntoIterator Iterator Option None Some Result Err Ok"
-                "Deprecatedlog_syntax Clone Clone Copy Copy Debug Default"
-                "Default Eq Eq Hash Ord Ord PartialEq PartialEq PartialOrd"
-                "PartialOrd ToOwned Box String ToString Vec FromIterator"
-                "TryFrom TryInto"
+                "IntoIterator Iterator Clone Copy Default Eq Ord PartialEq"
+                "PartialOrd ToOwned ToString TryFrom TryInto FromIterator"
+                "Box String Vec Option None Some Result Err Ok"
             ),
             0: "variable",
         },
-
-        { // (xxx::)xxx
-            match: /\b([a-zA-Z_][a-zA-Z_0-9]*)\b\s*(::)/,
-            1: "keyword2",
-            2: "tagName",
+        { // Self type
+            match: /\bSelf\b/,
+            0: "variable",
+        },
+        { // self value
+            match: /\bself\b/,
+            0: "constant",
         },
 
+        { // path-delim
+            match: /::/,
+            0: "path-delim",
+        },
+        { // module like path (type)
+            match: include("ident") + /(?=::[^<])/,
+            0: "namespace",
+        },
+        { // call function and Turbofish
+            match: include("ident") + /(?=::<|\()/,
+            0: "funcname",
+        },
+        { // call macro
+            match: include("ident") + /!/,
+            0: "preproc",
+        },
+        {include: "decl-macro-meta"}
+        { // attribute proc-macro ident
+            match: /#/ + include("ident"),
+            0: "preproc",
+        },
+        { // attribute proc-macro
+            start: {match: /#!?\[/},
+            end: {match: /\]/},
+            color: "preproc",
+            contains: [
+                {include: "attribute-proc-macro-item"},
+            ]
+        },
+        { // loop label
+            match: /'/+include("ident")+/:/,
+            0: "label"
+        },
+        { // lifetime
+            match: /'(?:/+include("ident")+/|_\b)(?!')/,
+            0: "meta"
+        },
+
+        { // 一些突出符号
+            match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|]|\bmove) ?\|\|)|\.(?=await))|([<>@|](?!=)|[=\-]>)/,
+            1: "keyword",
+            2: "operator",
+        },
         { // 一些前导符号
-            match: /([*&])(?=[a-zA-Z_])/,
-            1: "variable",
+            match: /([&~@*])(?![)= \s])/,
+            1: "operator",
         },
     ],
 }
