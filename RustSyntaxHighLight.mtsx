@@ -29,7 +29,7 @@
 
     defines: [
         "ident-continue": /[^\x00-\x20!"#$%&'()*+,\-.\/:;<=>?@\[\]^`{|}~]/
-        "norm-ident": /(?:\b_/+include("ident-continue")+/+\b|\b(?!\d)/+include("ident-continue")+/+\b)/
+        "norm-ident": /(?:\b_/+include("ident-continue")+/+\b|\b(?![\d_])/+include("ident-continue")+/+\b)/
         "ident": /(?:r#)?/ + include("norm-ident")
         "rust-derive-trait": {match: keywordsToRegex(
             "Clone Hash RustcEncodable RustcDecodable Encodable Decodable"
@@ -195,7 +195,7 @@
         },
 
         { // raw ident
-            match: /r#/ + include("norm-ident")
+            match: /r#/ + include("norm-ident") + /(?!::|[!\(])/
         }
 
         { // function define
@@ -285,11 +285,11 @@
             ]
         },
         { // loop label
-            match: /'/+include("ident")+/:/,
+            match: /'/+include("norm-ident")+/:/,
             0: "label"
         },
         { // lifetime
-            match: /'(?:/+include("ident")+/|_\b)(?!')/,
+            match: /'(?:/+include("norm-ident")+/|_\b)(?!')/,
             0: "meta"
         },
 
