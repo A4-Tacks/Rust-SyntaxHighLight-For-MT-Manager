@@ -96,64 +96,64 @@
                 contains: [
                     {
                         match: /(?:(\\(?:u\{(?:[_a-fA-F\d]_*){1,6}\}/
-                            + /|x[a-fA-F\d]{2}|[nrt\\0"']))|(\\.))/,
+                            + /|x[a-fA-F\d]{2}|[nrt\\0"'\r\n]))|(\\.))/,
                         1: "strEscape",
                         2: "error",
                     },
                 ],
             },
             { // raw string
-                start: {match: /b?r"/},
+                start: {match: /[bc]?r"/},
                 end: {match: /"/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r#"/},
+                start: {match: /[bc]?r#"/},
                 end: {match: /"#/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r##"/},
+                start: {match: /[bc]?r##"/},
                 end: {match: /"##/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r###"/},
+                start: {match: /[bc]?r###"/},
                 end: {match: /"###/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r####"/},
+                start: {match: /[bc]?r####"/},
                 end: {match: /"####/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r#####"/},
+                start: {match: /[bc]?r#####"/},
                 end: {match: /"#####/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r######"/},
+                start: {match: /[bc]?r######"/},
                 end: {match: /"######/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r#######"/},
+                start: {match: /[bc]?r#######"/},
                 end: {match: /"#######/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r########"/},
+                start: {match: /[bc]?r########"/},
                 end: {match: /"########/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r#########"/},
+                start: {match: /[bc]?r#########"/},
                 end: {match: /"#########/},
                 color: "string",
             },
             { // raw string tag......
-                start: {match: /b?r##########"/},
+                start: {match: /[bc]?r##########"/},
                 end: {match: /"##########/},
                 color: "string",
             },
