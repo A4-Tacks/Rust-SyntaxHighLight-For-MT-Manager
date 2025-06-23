@@ -40,7 +40,7 @@
             {include: "comments"}
             {include: "strings"}
             {
-                start: {match: /derive\(/}
+                start: {match: /\bderive\(/}
                 end: {match: /\)/}
                 contains: [
                     {include: "attribute-proc-macro-item"}
@@ -199,29 +199,29 @@
         }
 
         { // function define
-            match: /(fn)\s+(/+include("ident")+/)/,
+            match: /\b(fn)\s+(/+include("ident")+/)/,
             1: "keyword",
             2: "funcname",
         },
         { // weak union keyword
-            match: /(union)\s+(/+include("ident")+/)/,
+            match: /\b(union)\s+(/+include("ident")+/)/,
             1: "keyword",
             2: "typename",
         },
         { // weak default keyword
-            match: /(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)(?:gen\s+)(?:unsafe\s+)(?:safe\s+)(?:fn|extern)|type|const)\b)/,
+            match: /\b(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)(?:gen\s+)(?:unsafe\s+)(?:safe\s+)(?:fn|extern)|type|const)\b)/,
             1: "keyword",
         },
         { // weak safe keyword
-            match: /(safe)\s+(?=(?:static|fn|extern)\b)/,
+            match: /\b(safe)\s+(?=(?:static|fn|extern)\b)/,
             1: "keyword",
         },
         { // weak auto keyword
-            match: /(auto)\s+(?=trait\b)/,
+            match: /\b(auto)\s+(?=trait\b)/,
             1: "keyword",
         },
         { // weak gen keyword
-            match: /(gen)(?=\s+(?:unsafe\s+)?(?:safe\s+)?(?:fn|extern)\b|\s*(?:\bmove\s*)?[\{|])/,
+            match: /\b(gen)(?=\s+(?:unsafe\s+)?(?:safe\s+)?(?:fn|extern)\b|\s*(?:\bmove\s*)?[\{|])/,
             1: "keyword",
         },
         { // weak &raw const|mut keyword
@@ -315,7 +315,7 @@
         },
 
         { // 一些突出符号
-            match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\bmove|=>) ?\|\|)|\.(?=await))|([<>@|](?!=)|[=\-]>)/,
+            match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\bmove|=>) ?\|\|)|\.(?=await\b))|([<>@|](?!=)|[=\-]>)/,
             1: "keyword",
             2: "operator",
         },
