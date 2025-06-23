@@ -11,6 +11,7 @@
         "funcname"          > "tagName",
         "typename"          > "type",
         "path-delim"        > "operator",
+        "doc-comment"       > "namespace"
     ],
 
     // default format comment
@@ -33,6 +34,10 @@
         "ident": /(?:r#)?/ + include("norm-ident")
         "sip-val": /(?:(?:[^(){}\[\]"',;=]|\{\}|\((?:\(\))?\)|\[\])+)/
 
+        "todo": {
+            match: keywordsToRegex("TODO FIXME XXX NB NOTE SAFETY")
+            0: "variable"
+        }
         "rust-derive-trait": {match: keywordsToRegex(
             "Clone Hash RustcEncodable RustcDecodable Encodable Decodable"
             "PartialEq Eq PartialOrd Ord Rand Show Debug Default"
@@ -69,25 +74,30 @@
         "comments": [
             { // doc comment
                 match: /\/\/[!\/].*(?:\n|$)/,
-                0: "namespace",
+                0: "doc-comment",
+                0: {include: "todo"}
             },
             { // comment
                 match: /\/\/.*(?:\n|$)/,
                 0: "comment",
+                0: {include: "todo"}
             },
             { // zero length long comment
                 match: /\/\*\*\//,
                 0: "comment",
+                0: {include: "todo"}
             },
             { // long doc comment
                 start: {match: /\/\*[*!]/},
                 end: {match: /\*\//},
-                color: "namespace",
+                color: "doc-comment",
+                contains: [{include: "todo"}]
             },
             { // long comment
                 start: {match: /\/\*/},
                 end: {match: /\*\//},
                 color: "comment",
+                contains: [{include: "todo"}]
             },
         ]
         "string-escape": {
