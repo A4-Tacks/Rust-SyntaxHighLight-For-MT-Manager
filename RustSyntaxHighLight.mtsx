@@ -32,7 +32,8 @@
         "ident-continue": /[^\x00-\x20!"#$%&'()*+,\-.\/:;<=>?@\[\]^`{|}~]/
         "norm-ident": /(?:\b_/+include("ident-continue")+/+\b|\b(?![\d_])/+include("ident-continue")+/+\b)/
         "ident": /(?:r#)?/ + include("norm-ident")
-        "sip-val": /(?:(?:[^(){}\[\]"',;=]|\{\}|\((?:\(\))?\)|\[\])+)/
+        "sip-bounded": /\s*(?:[^(){}\[\]"';]|\(\))*(?:\(\))?\s*/
+        "sip-val": /(?:(?:[^(){}\[\]"',;=]|\{\}|\[\]|\((?:\(\)|\(/+include("sip-bounded")+/\)|/+include("sip-bounded")+/)?\))+)/
 
         "todo": {
             match: keywordsToRegex("TODO FIXME XXX NB NOTE SAFETY")
@@ -259,6 +260,191 @@
                 0: "preproc",
             },
         ]
+        "format-macros": [
+            { // formats template string
+                group: link
+                contains: [
+                    {
+                        match: /(/ + keywordsToRegex(
+                            "format format_args format_args_nl const_format_args"
+                            "print println eprint eprintln"
+                            "panic todo unimplemented unreachable"
+                        ) + /!)\(\s*/
+                        // NOTE: 未来不要将此纳入 TokenTree 的匹配, 因为这造成了括号高亮不平衡
+                        1: "preproc"
+                    }
+                    {include: "format-macro-template-string"}
+                ]
+            }
+
+            { // formats (write & assert) template string
+                group: link
+                contains: [
+                    {
+                        match: /\b((?:write(?:ln)?|assert|debug_assert)!)\(\s*(/+include("sip-val")+/),\s*/
+                        1: "preproc"
+                        2: {include: "top"}
+                    }
+                    {include: "format-macro-template-string"}
+                ]
+            }
+
+            { // formats (assert_eq) template string
+                group: link
+                contains: [
+                    {
+                        match: /\b((?:(?:debug_)?assert_(?:eq|ne))!)\(\s*(/+include("sip-val")+/,\s*/+include("sip-val")+/),\s*/
+                        1: "preproc"
+                        2: {include: "top"}
+                    }
+                    {include: "format-macro-template-string"}
+                ]
+            }
+        ]
+        "top": [
+            {include: "comments"}
+            {include: "format-macros"}
+            {include: "strings"}
+
+            { // number
+                match: /\b(?:0(?:x[_a-fA-F\d]+|o[_0-7]+|b[_01]+)/
+                    + /(?:[iu](?:8|16|32|64|128|size))?/
+                    + /|\d[_\d]*(?:\.\d[_\d]*)?/
+                    + /(?:f(?:32|64)|[iu](?:8|16|32|64|128|size))?/
+                    + /)\b/,
+                0: "number",
+            },
+
+            { // raw ident
+                match: /r#/ + include("norm-ident") + /(?!::|[!\(])/
+            }
+
+            { // function define
+                match: /\b(fn)\s+(/+include("ident")+/)/,
+                1: "keyword",
+                2: "funcname",
+            },
+            { // weak union keyword
+                match: /\b(union)\s+(/+include("ident")+/)/,
+                1: "keyword",
+                2: "typename",
+            },
+            { // weak default keyword
+                match: /\b(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)(?:gen\s+)(?:unsafe\s+)(?:safe\s+)(?:fn|extern)|type|const)\b)/,
+                1: "keyword",
+            },
+            { // weak safe keyword
+                match: /\b(safe)\s+(?=(?:static|fn|extern)\b)/,
+                1: "keyword",
+            },
+            { // weak auto keyword
+                match: /\b(auto)\s+(?=trait\b)/,
+                1: "keyword",
+            },
+            { // weak gen keyword
+                match: /\b(gen)(?=\s+(?:unsafe\s+)?(?:safe\s+)?(?:fn|extern)\b|\s*(?:\bmove\s*)?[\{|])/,
+                1: "keyword",
+            },
+            { // weak &raw const|mut keyword
+                match: /(&)\s*(raw)\s+(?=(?:const|mut)\b)/,
+                1: "operator",
+                2: "keyword",
+            },
+            { // reserved keywords
+                match: keywordsToRegex(
+                    "abstract become box do final override"
+                    "priv typeof unsized virtual become"
+                ),
+                0: "error",
+            },
+            { // strict keywords
+                match: keywordsToRegex(
+                    "as break const continue crate dyn"
+                    "else enum extern false fn for"
+                    "if impl in let loop match"
+                    "mod move mut pub ref return"
+                    "static struct super trait"
+                    "true type unsafe use where while"
+                    "async await macro try yield"),
+                0: "keyword",
+            },
+            { // type
+                match: keywordsToRegex(
+                "bool char"
+                "fn"
+                "str"
+                "f32 f64"
+                "i8 i16 i32 i64 i128 isize"
+                "u8 u16 u32 u64 u128 usize"),
+                0: "type",
+            },
+            { // 被预导入的结构体与特征等 (取材自 Rust 2024 edition)
+                match: keywordsToRegex(
+                    "Send Sized Sync Unpin Drop Fn FnMut FnOnce AsMut AsRef"
+                    "From Into DoubleEndedIterator ExactSizeIterator Extend"
+                    "IntoIterator Iterator Clone Copy Default Eq Ord PartialEq"
+                    "PartialOrd ToOwned ToString TryFrom TryInto FromIterator"
+                    "Box String Vec Option None Some Result Err Ok Future IntoFuture"
+                ),
+                0: "variable",
+            },
+            { // Self type
+                match: /\bSelf\b/,
+                0: "variable",
+            },
+            { // self value
+                match: /\bself\b/,
+                0: "constant",
+            },
+
+            { // path-delim
+                match: /::/,
+                0: "path-delim",
+            },
+            { // module like path (type)
+                match: include("ident") + /(?=::[^<])/,
+                0: "namespace",
+            },
+            { // call function and Turbofish
+                match: include("ident") + /(?=::<|\()/,
+                0: "funcname",
+            },
+            { // call macro
+                match: include("ident") + /!/,
+                0: "preproc",
+            },
+            {include: "decl-macro-meta"}
+            { // attribute proc-macro ident
+                match: /#/ + include("ident"),
+                0: "preproc",
+            },
+            { // attribute proc-macro
+                start: {match: /#!?\[/},
+                end: {match: /\]/},
+                color: "preproc",
+                contains: [
+                    {include: "attribute-proc-macro-item"},
+                ]
+            },
+            { // loop label
+                match: /'/+include("ident")+/:/,
+                0: "label"
+            },
+            { // lifetime
+                match: /'(?:/+include("ident")+/|_\b)(?!')/,
+                0: "meta"
+            },
+
+            { // 一些突出符号
+                match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\bmove|=>) ?\|\|)|\.(?=await\b))|([<>@|](?!=)|[=\-]>)/,
+                1: "keyword",
+                2: "operator",
+            },
+            { // 一些前导符号
+                match: /([&~@*])(?![)= \s])/,
+                1: "operator",
+            },
+        ]
     ]
 
     contains: [
@@ -266,175 +452,6 @@
             match: /^#![^\[\r\n][^\r\n]*/,
             0: "comment"
         }
-        {include: "comments"}
-
-        { // formats template string
-            group: link
-            contains: [
-                {
-                    match: /(/ + keywordsToRegex(
-                        "format format_args format_args_nl const_format_args"
-                        "print println eprint eprintln"
-                        "panic todo unimplemented unreachable"
-                    ) + /!)\(\s*/
-                    // NOTE: 未来不要将此纳入 TokenTree 的匹配, 因为这造成了括号高亮不平衡
-                    1: "preproc"
-                }
-                {include: "format-macro-template-string"}
-            ]
-        }
-
-        { // formats (write) template string
-            group: link
-            contains: [
-                {
-                    match: /\b((?:write(?:ln)?)!)\(\s*/+include("sip-val")+/,\s*/
-                    // NOTE: 未来不要将此纳入 TokenTree 的匹配, 因为这造成了括号高亮不平衡
-                    1: "preproc"
-                }
-                {include: "format-macro-template-string"}
-            ]
-        }
-
-        {include: "strings"}
-
-        { // number
-            match: /\b(?:0(?:x[_a-fA-F\d]+|o[_0-7]+|b[_01]+)/
-                + /(?:[iu](?:8|16|32|64|128|size))?/
-                + /|\d[_\d]*(?:\.\d[_\d]*)?/
-                + /(?:f(?:32|64)|[iu](?:8|16|32|64|128|size))?/
-                + /)\b/,
-            0: "number",
-        },
-
-        { // raw ident
-            match: /r#/ + include("norm-ident") + /(?!::|[!\(])/
-        }
-
-        { // function define
-            match: /\b(fn)\s+(/+include("ident")+/)/,
-            1: "keyword",
-            2: "funcname",
-        },
-        { // weak union keyword
-            match: /\b(union)\s+(/+include("ident")+/)/,
-            1: "keyword",
-            2: "typename",
-        },
-        { // weak default keyword
-            match: /\b(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)(?:gen\s+)(?:unsafe\s+)(?:safe\s+)(?:fn|extern)|type|const)\b)/,
-            1: "keyword",
-        },
-        { // weak safe keyword
-            match: /\b(safe)\s+(?=(?:static|fn|extern)\b)/,
-            1: "keyword",
-        },
-        { // weak auto keyword
-            match: /\b(auto)\s+(?=trait\b)/,
-            1: "keyword",
-        },
-        { // weak gen keyword
-            match: /\b(gen)(?=\s+(?:unsafe\s+)?(?:safe\s+)?(?:fn|extern)\b|\s*(?:\bmove\s*)?[\{|])/,
-            1: "keyword",
-        },
-        { // weak &raw const|mut keyword
-            match: /(&)\s*(raw)\s+(?=(?:const|mut)\b)/,
-            1: "operator",
-            2: "keyword",
-        },
-        { // reserved keywords
-            match: keywordsToRegex(
-                "abstract become box do final override"
-                "priv typeof unsized virtual become"
-            ),
-            0: "error",
-        },
-        { // strict keywords
-            match: keywordsToRegex(
-                "as break const continue crate dyn"
-                "else enum extern false fn for"
-                "if impl in let loop match"
-                "mod move mut pub ref return"
-                "static struct super trait"
-                "true type unsafe use where while"
-                "async await macro try yield"),
-            0: "keyword",
-        },
-        { // type
-            match: keywordsToRegex(
-            "bool char"
-            "fn"
-            "str"
-            "f32 f64"
-            "i8 i16 i32 i64 i128 isize"
-            "u8 u16 u32 u64 u128 usize"),
-            0: "type",
-        },
-        { // 被预导入的结构体与特征等 (取材自 Rust 2024 edition)
-            match: keywordsToRegex(
-                "Send Sized Sync Unpin Drop Fn FnMut FnOnce AsMut AsRef"
-                "From Into DoubleEndedIterator ExactSizeIterator Extend"
-                "IntoIterator Iterator Clone Copy Default Eq Ord PartialEq"
-                "PartialOrd ToOwned ToString TryFrom TryInto FromIterator"
-                "Box String Vec Option None Some Result Err Ok Future IntoFuture"
-            ),
-            0: "variable",
-        },
-        { // Self type
-            match: /\bSelf\b/,
-            0: "variable",
-        },
-        { // self value
-            match: /\bself\b/,
-            0: "constant",
-        },
-
-        { // path-delim
-            match: /::/,
-            0: "path-delim",
-        },
-        { // module like path (type)
-            match: include("ident") + /(?=::[^<])/,
-            0: "namespace",
-        },
-        { // call function and Turbofish
-            match: include("ident") + /(?=::<|\()/,
-            0: "funcname",
-        },
-        { // call macro
-            match: include("ident") + /!/,
-            0: "preproc",
-        },
-        {include: "decl-macro-meta"}
-        { // attribute proc-macro ident
-            match: /#/ + include("ident"),
-            0: "preproc",
-        },
-        { // attribute proc-macro
-            start: {match: /#!?\[/},
-            end: {match: /\]/},
-            color: "preproc",
-            contains: [
-                {include: "attribute-proc-macro-item"},
-            ]
-        },
-        { // loop label
-            match: /'/+include("ident")+/:/,
-            0: "label"
-        },
-        { // lifetime
-            match: /'(?:/+include("ident")+/|_\b)(?!')/,
-            0: "meta"
-        },
-
-        { // 一些突出符号
-            match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\bmove|=>) ?\|\|)|\.(?=await\b))|([<>@|](?!=)|[=\-]>)/,
-            1: "keyword",
-            2: "operator",
-        },
-        { // 一些前导符号
-            match: /([&~@*])(?![)= \s])/,
-            1: "operator",
-        },
+        {include: "top"}
     ],
 }
