@@ -330,7 +330,7 @@
                 2: "typename",
             },
             { // weak default keyword
-                match: /\b(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)(?:gen\s+)(?:unsafe\s+)(?:safe\s+)(?:fn|extern)|type|const)\b)/,
+                match: /\b(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)?(?:gen\s+)?(?:unsafe\s+)?(?:safe\s+)?(?:fn|extern)|type|const)\b)/,
                 1: "keyword",
             },
             { // weak safe keyword
