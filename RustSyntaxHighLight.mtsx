@@ -33,7 +33,7 @@
         "norm-ident": /(?:\b_/+include("ident-continue")+/+\b|\b(?![\d_])/+include("ident-continue")+/+\b)/
         "ident": /(?:r#)?/ + include("norm-ident")
         "sip-bounded": /\s*(?:[^(){}\[\]"';]|\(\))*(?:\(\))?\s*/
-        "sip-val": /(?:(?:[^(){}\[\]"',;=]|\{\}|\[\]|\((?:\(\)|\(/+include("sip-bounded")+/\)|/+include("sip-bounded")+/)?\))+)/
+        "sip-val": /(?:(?:[^(){}\[\]"',;]|\{/+include("sip-bounded")+/\}|\[/+include("sip-bounded")+/\]|\((?:\(\)|\(/+include("sip-bounded")+/\)|/+include("sip-bounded")+/)?\))+)/
 
         "todo": {
             match: keywordsToRegex("TODO FIXME XXX NB NOTE SAFETY")
