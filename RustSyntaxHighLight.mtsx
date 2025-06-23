@@ -285,11 +285,11 @@
             ]
         },
         { // loop label
-            match: /'/+include("norm-ident")+/:/,
+            match: /'/+include("ident")+/:/,
             0: "label"
         },
         { // lifetime
-            match: /'(?:/+include("norm-ident")+/|_\b)(?!')/,
+            match: /'(?:/+include("ident")+/|_\b)(?!')/,
             0: "meta"
         },
 
