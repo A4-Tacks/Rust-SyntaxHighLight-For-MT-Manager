@@ -370,13 +370,13 @@
             "u8 u16 u32 u64 u128 usize"),
             0: "type",
         },
-        { // 被预导入的结构体与特征等 (取材自 Rust 2021 edition)
+        { // 被预导入的结构体与特征等 (取材自 Rust 2024 edition)
             match: keywordsToRegex(
                 "Send Sized Sync Unpin Drop Fn FnMut FnOnce AsMut AsRef"
                 "From Into DoubleEndedIterator ExactSizeIterator Extend"
                 "IntoIterator Iterator Clone Copy Default Eq Ord PartialEq"
                 "PartialOrd ToOwned ToString TryFrom TryInto FromIterator"
-                "Box String Vec Option None Some Result Err Ok"
+                "Box String Vec Option None Some Result Err Ok Future IntoFuture"
             ),
             0: "variable",
         },
