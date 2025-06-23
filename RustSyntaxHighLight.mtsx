@@ -385,6 +385,7 @@
                     "IntoIterator Iterator Clone Copy Default Eq Ord PartialEq"
                     "PartialOrd ToOwned ToString TryFrom TryInto FromIterator"
                     "Box String Vec Option None Some Result Err Ok Future IntoFuture"
+                    "AsyncFn AsyncFnMut AsyncFnOnce"
                 ),
                 0: "variable",
             },
