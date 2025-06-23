@@ -203,15 +203,36 @@
             1: "keyword",
             2: "funcname",
         },
-        { // weak keywords
+        { // weak union keyword
             match: /(union)\s+(/+include("ident")+/)/,
             1: "keyword",
             2: "typename",
         },
+        { // weak default keyword
+            match: /(default)\s+(?=(?:(?:unsafe\s+)?impl|(?:async\s+)(?:gen\s+)(?:unsafe\s+)(?:safe\s+)(?:fn|extern)|type|const)\b)/,
+            1: "keyword",
+        },
+        { // weak safe keyword
+            match: /(safe)\s+(?=(?:static|fn|extern)\b)/,
+            1: "keyword",
+        },
+        { // weak auto keyword
+            match: /(auto)\s+(?=trait\b)/,
+            1: "keyword",
+        },
+        { // weak gen keyword
+            match: /(gen)(?=\s+(?:unsafe\s+)?(?:safe\s+)?(?:fn|extern)\b|\s*(?:\bmove\s*)?[\{|])/,
+            1: "keyword",
+        },
+        { // weak &raw const|mut keyword
+            match: /(&)\s*(raw)\s+(?=(?:const|mut)\b)/,
+            1: "operator",
+            2: "keyword",
+        },
         { // reserved keywords
             match: keywordsToRegex(
                 "abstract become box do final override"
-                "priv typeof unsized virtual"
+                "priv typeof unsized virtual become"
             ),
             0: "error",
         },
