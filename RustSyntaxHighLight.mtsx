@@ -414,7 +414,7 @@
                 0: "funcname",
             },
             { // call macro
-                match: include("ident") + /!/,
+                match: include("ident") + /!(?!=)/,
                 0: "preproc",
             },
             {include: "decl-macro-meta"}
@@ -440,14 +440,22 @@
             },
 
             { // 一些突出符号
-                match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\bmove|=>) ?\|\|)|\.(?=await\b))|([<>@|](?!=)|[=\-]>)/,
+                match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\b(?:const|static|async|gen|move)|=>) ?\|\|)|\.(?=await\b))|([@|](?!=)|[=\-]>)/,
                 1: "keyword",
                 2: "operator",
             },
+            { // 比较相关运算符
+                match: /[<!>=]=|[<>]/,
+                0: "operator"
+            }
             { // 一些前导符号
                 match: /([&~@*])(?![)= \s])/,
                 1: "operator",
             },
+            { // 一些运算及赋值
+                match: /[+\-*\/%^&|]=?|=/
+                0: "keyword2",
+            }
         ]
     ]
 
