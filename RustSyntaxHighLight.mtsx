@@ -295,7 +295,7 @@
                 group: link
                 contains: [
                     {
-                        match: /\b((?:(?:debug_)?assert_(?:eq|ne))!)\(\s*(/+include("sip-val")+/,\s*/+include("sip-val")+/),\s*/
+                        match: /\b((?:(?:debug_)?assert_(?:eq|ne|matches))!)\(\s*(/+include("sip-val")+/,\s*/+include("sip-val")+/),\s*/
                         1: "preproc"
                         2: {include: "top"}
                     }
