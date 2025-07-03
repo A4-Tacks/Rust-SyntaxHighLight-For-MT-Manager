@@ -35,6 +35,9 @@
         "sip-str": /(?:"(?:[^"\\]|\\.)*"|'[^'\\]'|'\\.')/
         "sip-bounded": /\s*(?:[^(){}\[\]"';]|/+include("sip-str")+/|\(\))*(?:\(\))?\s*/
         "sip-val": /(?:(?:[^(){}\[\]"',;]|/+include("sip-str")+/|\{/+include("sip-bounded")+/\}|\[/+include("sip-bounded")+/\]|\((?:\(\)|\(/+include("sip-bounded")+/\)|/+include("sip-bounded")+/)?\))+)/
+        "isuf": /(?:[iu](?:8|16|32|64|128|size)\b)/
+        "fsuf": /(?:f(?:32|64)\b)/
+        "nsuf": /(?:/+include("isuf")+/|/+include("fsuf")+/)/
 
         "todo": {
             match: keywordsToRegex("TODO FIXME XXX NB NOTE SAFETY")
@@ -309,14 +312,17 @@
             {include: "format-macros"}
             {include: "strings"}
 
+            { // literal neg
+                match: /-(?=\d)/,
+                0: "operator"
+            }
+
             { // number
-                match: /\b(?:0(?:x[_a-fA-F\d]+|o[_0-7]+|b[_01]+)/
-                    + /(?:[iu](?:8|16|32|64|128|size))?/
-                    + /|\d[_\d]*(?:\.\d[_\d]*)?/
-                    + /(?:f(?:32|64)|[iu](?:8|16|32|64|128|size))?/
-                    + /)\b/,
+                match: /\b0(?:x[_a-fA-F\d]+|o[_0-7]+|b[_01]+)/+include("isuf")+/?/
+                    + /|\b\d[_\d]*\.(?!\d)/
+                    + /|\b\d[_\d]*(?:\.\d[_\d]*)?(?:/+include("nsuf")+/|[eE][+-]?[_\d]+/+include("fsuf")+/?)?/,
                 0: "number",
-            },
+            }
 
             { // raw ident
                 match: /r#/ + include("norm-ident") + /(?!::|[!\(])/
@@ -440,7 +446,7 @@
             },
 
             { // 一些突出符号
-                match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\b(?:const|static|async|gen|move)|=>) ?\|\|)|\.(?=await\b))|([@|](?!=)|[=\-]>)/,
+                match: /([?]|&&|\|\|(?![ \t]*(?:\{|->))(?<!(?:[=(|,;]|\b(?:const|static|async|gen|move)|=>) ?\|\|)|\.(?=await\b|\d))|([@|](?!=)|[=\-]>)/,
                 1: "keyword",
                 2: "operator",
             },
