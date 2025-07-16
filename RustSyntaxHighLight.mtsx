@@ -122,6 +122,7 @@
                 1: "default"
                 2: "default"
                 2: {match: /(?:/+include("norm-ident")+/|0|[1-9]\d*)\$/, 0: "preproc"}
+                2: {match: /(?<=\.)\*/, 0: "preproc"}
                 2: {match: /(?:[xX]\?|\?|[oxXpbeE])$/, 0: "keyword"}
                 3: "preproc"
                 4: "keyword"
