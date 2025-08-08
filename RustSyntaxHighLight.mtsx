@@ -19,6 +19,18 @@
         insertSpace: true,
         addToContains: false, // 不高亮
     },
+    // outer doc comment
+    comment: {
+        startsWith: "///",
+        insertSpace: true,
+        addToContains: false, // 不高亮
+    },
+    // inner doc comment
+    comment: {
+        startsWith: "//!",
+        insertSpace: true,
+        addToContains: false, // 不高亮
+    },
     // long comment
     comment: {
         startsWith: "/*",
