@@ -4,7 +4,6 @@
     // @last-edit-date: ...
     // @repo: https://github.com/A4-Tacks/Rust-SyntaxHighLight-For-MT-Manager
     name: ["Rust", ".rs"],
-    hide: false,
 
     styles: [
         "preproc"           > "label",
