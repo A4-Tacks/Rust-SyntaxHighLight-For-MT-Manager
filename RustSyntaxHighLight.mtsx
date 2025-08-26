@@ -367,7 +367,7 @@
                 1: "keyword",
             },
             { // weak &raw const|mut keyword
-                match: /(&)\s*(raw)\s+(?=(?:const|mut)\b)/,
+                match: /(&)\s*(raw|pin)\s+(?=(?:const|mut)\b)/,
                 1: "operator",
                 2: "keyword",
             },
